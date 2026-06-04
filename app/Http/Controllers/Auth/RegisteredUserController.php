@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -43,6 +44,8 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+
+        app(CreateWorkspaceForUser::class)->handle($user);
 
         Auth::login($user);
 
