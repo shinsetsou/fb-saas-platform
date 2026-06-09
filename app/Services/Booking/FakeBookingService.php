@@ -9,43 +9,29 @@ use Illuminate\Support\Collection;
 
 class FakeBookingService implements BookingService
 {
+    public function __construct(private SlotGenerator $slots) {}
+
     public function availability(Workspace $workspace, Carbon $day): array
     {
-        $settings = $workspace->botSetting;
-        $tz = $settings->booking_timezone ?: 'UTC';
-        $duration = (int) $settings->default_appointment_duration_minutes;
-        $buffer = (int) $settings->buffer_minutes;
-        $hours = $settings->booking_hours ?? [];
-
-        $day = $day->copy()->setTimezone($tz)->startOfDay();
-        $weekday = strtolower($day->format('l'));
-        $ranges = $hours[$weekday] ?? [];
+        $candidates = $this->slots->generate($workspace->botSetting, $day);
+        if ($candidates === []) {
+            return [];
+        }
 
         $booked = $workspace->appointments()
             ->where('status', 'booked')
-            ->whereDate('starts_at', $day->toDateString())
+            ->whereDate('starts_at', $candidates[0]['start']->toDateString())
             ->get();
 
-        $slots = [];
-        foreach ($ranges as $range) {
-            $cursor = $day->copy()->setTimeFromTimeString($range['start']);
-            $end = $day->copy()->setTimeFromTimeString($range['end']);
-
-            while ($cursor->copy()->addMinutes($duration)->lte($end)) {
-                $slotStart = $cursor->copy();
-                $slotEnd = $cursor->copy()->addMinutes($duration);
-
-                $conflict = $booked->first(fn (Appointment $a) => $slotStart->lt($a->ends_at) && $slotEnd->gt($a->starts_at));
-
-                if (! $conflict) {
-                    $slots[] = $slotStart->toIso8601String();
-                }
-
-                $cursor->addMinutes($duration + $buffer);
+        $open = [];
+        foreach ($candidates as $slot) {
+            $conflict = $booked->first(fn (Appointment $a) => $slot['start']->lt($a->ends_at) && $slot['end']->gt($a->starts_at));
+            if (! $conflict) {
+                $open[] = $slot['start']->toIso8601String();
             }
         }
 
-        return $slots;
+        return $open;
     }
 
     public function book(Workspace $workspace, Carbon $startsAt, array $customer, ?int $conversationId = null): Appointment
