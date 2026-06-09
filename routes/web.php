@@ -3,6 +3,7 @@
 use App\Http\Controllers\BotSettingsController;
 use App\Http\Controllers\ChatTesterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/chat-tester', [ChatTesterController::class, 'index'])->name('chat-tester.index');
     Route::post('/chat-tester', [ChatTesterController::class, 'store'])->name('chat-tester.store');
+
+    Route::get('/google/connect', [GoogleCalendarController::class, 'connect'])->name('google.connect');
+    Route::get('/google/callback', [GoogleCalendarController::class, 'callback'])->name('google.callback');
+    Route::delete('/google/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.disconnect');
 });
 
 Route::middleware('auth')->group(function () {
