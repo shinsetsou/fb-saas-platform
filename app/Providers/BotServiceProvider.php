@@ -21,5 +21,10 @@ class BotServiceProvider extends ServiceProvider
 
             return new AnthropicClaudeClient($client);
         });
+
+        $this->app->bind(
+            \App\Services\Channels\ConversationChannel::class,
+            \App\Services\Channels\WebChatChannel::class,
+        );
     }
 }
