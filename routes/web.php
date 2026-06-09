@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatTesterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BotSettingsController;
 use App\Http\Controllers\ProfileController;
@@ -16,6 +17,9 @@ Route::get('/dashboard', DashboardController::class)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/bot-settings', [BotSettingsController::class, 'edit'])->name('bot-settings.edit');
     Route::put('/bot-settings', [BotSettingsController::class, 'update'])->name('bot-settings.update');
+
+    Route::get('/chat-tester', [ChatTesterController::class, 'index'])->name('chat-tester.index');
+    Route::post('/chat-tester', [ChatTesterController::class, 'store'])->name('chat-tester.store');
 });
 
 Route::middleware('auth')->group(function () {
