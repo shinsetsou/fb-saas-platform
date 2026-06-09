@@ -66,4 +66,17 @@ class GoogleCalendarConnectionTest extends TestCase
             ->get('/google/connect')
             ->assertRedirectContains('accounts.google.com');
     }
+
+    public function test_callback_with_error_redirects_without_storing(): void
+    {
+        $user = User::factory()->create();
+        app(CreateWorkspaceForUser::class)->handle($user);
+
+        $this->actingAs($user)
+            ->get('/google/callback?error=access_denied')
+            ->assertRedirect('/dashboard')
+            ->assertSessionHas('status', 'google-connect-failed');
+
+        $this->assertDatabaseCount('google_accounts', 0);
+    }
 }
