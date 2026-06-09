@@ -21,8 +21,7 @@ class ProcessIncomingMessage implements ShouldQueue
         public string $channel,
         public string $participantId,
         public string $text,
-    ) {
-    }
+    ) {}
 
     public function handle(BotEngine $engine, ConversationChannel $channel): void
     {

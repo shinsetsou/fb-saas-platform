@@ -6,7 +6,9 @@ use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Jobs\ProcessIncomingMessage;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\Bot\BotEngine;
 use App\Services\Bot\Claude\ClaudeClient;
+use App\Services\Channels\WebChatChannel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\FakeClaudeClient;
 use Tests\TestCase;
@@ -28,7 +30,7 @@ class ProcessIncomingMessageTest extends TestCase
         ]));
 
         (new ProcessIncomingMessage($workspace->id, 'web', 'visitor-1', 'hello'))
-            ->handle(app(\App\Services\Bot\BotEngine::class), app(\App\Services\Channels\WebChatChannel::class));
+            ->handle(app(BotEngine::class), app(WebChatChannel::class));
 
         $conversation = Conversation::where('external_participant_id', 'visitor-1')->firstOrFail();
         $this->assertDatabaseHas('messages', [

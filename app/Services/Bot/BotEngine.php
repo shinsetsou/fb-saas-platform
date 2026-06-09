@@ -16,8 +16,7 @@ class BotEngine
         private ClaudeClient $claude,
         private ToolRegistry $tools,
         private SystemPromptBuilder $prompts,
-    ) {
-    }
+    ) {}
 
     public function handle(Conversation $conversation, string $userText): string
     {

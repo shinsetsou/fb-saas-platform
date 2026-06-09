@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\BotSettingsController;
 use App\Http\Controllers\ChatTesterController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\BotSettingsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 

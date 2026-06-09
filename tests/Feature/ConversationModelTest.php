@@ -2,11 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\Appointment;
-use App\Models\Conversation;
-use App\Models\Message;
-use App\Models\User;
 use App\Actions\Workspaces\CreateWorkspaceForUser;
+use App\Models\Conversation;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

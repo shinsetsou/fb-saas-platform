@@ -6,9 +6,7 @@ use Anthropic\Client;
 
 class AnthropicClaudeClient implements ClaudeClient
 {
-    public function __construct(private Client $client)
-    {
-    }
+    public function __construct(private Client $client) {}
 
     public function createMessage(array $params): array
     {

@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Models\User;
+use App\Models\Workspace;
 use App\Services\Booking\FakeBookingService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,7 +14,7 @@ class FakeBookingServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function workspaceWithHours(): \App\Models\Workspace
+    private function workspaceWithHours(): Workspace
     {
         $user = User::factory()->create();
         $workspace = app(CreateWorkspaceForUser::class)->handle($user);

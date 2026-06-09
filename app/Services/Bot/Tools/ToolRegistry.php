@@ -7,9 +7,7 @@ use Carbon\Carbon;
 
 class ToolRegistry
 {
-    public function __construct(private BookingService $booking)
-    {
-    }
+    public function __construct(private BookingService $booking) {}
 
     /** @return array<int, array<string, mixed>> */
     public function definitions(): array
@@ -88,7 +86,7 @@ class ToolRegistry
     }
 
     /**
-     * @param array<string, mixed> $input
+     * @param  array<string, mixed>  $input
      */
     public function execute(string $name, array $input, ToolContext $context): string
     {

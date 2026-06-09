@@ -10,6 +10,5 @@ class ToolContext
     public function __construct(
         public Workspace $workspace,
         public Conversation $conversation,
-    ) {
-    }
+    ) {}
 }

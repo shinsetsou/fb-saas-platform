@@ -7,6 +7,8 @@ use App\Services\Booking\BookingService;
 use App\Services\Booking\FakeBookingService;
 use App\Services\Bot\Claude\AnthropicClaudeClient;
 use App\Services\Bot\Claude\ClaudeClient;
+use App\Services\Channels\ConversationChannel;
+use App\Services\Channels\WebChatChannel;
 use Illuminate\Support\ServiceProvider;
 
 class BotServiceProvider extends ServiceProvider
@@ -23,8 +25,8 @@ class BotServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(
-            \App\Services\Channels\ConversationChannel::class,
-            \App\Services\Channels\WebChatChannel::class,
+            ConversationChannel::class,
+            WebChatChannel::class,
         );
     }
 }
