@@ -40,4 +40,9 @@ class Workspace extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function googleAccount(): HasOne
+    {
+        return $this->hasOne(GoogleAccount::class);
+    }
 }
