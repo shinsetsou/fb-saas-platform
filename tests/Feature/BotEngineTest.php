@@ -5,21 +5,32 @@ namespace Tests\Feature;
 use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\Booking\Google\GoogleCalendar;
 use App\Services\Bot\BotEngine;
 use App\Services\Bot\Claude\ClaudeClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\FakeClaudeClient;
+use Tests\Support\FakeGoogleCalendar;
 use Tests\TestCase;
 
 class BotEngineTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->app->instance(GoogleCalendar::class, new FakeGoogleCalendar());
+    }
+
     private function conversation(): Conversation
     {
         $user = User::factory()->create();
         $workspace = app(CreateWorkspaceForUser::class)->handle($user);
         $workspace->botSetting->update(['is_enabled' => true]);
+        $workspace->googleAccount()->create([
+            'access_token' => 'a', 'refresh_token' => 'r', 'expires_at' => now()->addHour(), 'calendar_id' => 'primary',
+        ]);
 
         return Conversation::create([
             'workspace_id' => $workspace->id,
