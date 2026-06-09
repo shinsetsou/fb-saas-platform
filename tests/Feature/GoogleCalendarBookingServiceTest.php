@@ -64,6 +64,20 @@ class GoogleCalendarBookingServiceTest extends TestCase
         $this->assertDatabaseHas('appointments', ['external_event_id' => 'fake-event-1', 'status' => 'booked']);
     }
 
+    public function test_reschedule_patches_event_and_updates_times(): void
+    {
+        $workspace = $this->connectedWorkspace();
+        $calendar = new FakeGoogleCalendar();
+        $service = new GoogleCalendarBookingService($calendar, app(SlotGenerator::class));
+        $appointment = $service->book($workspace, Carbon::parse('2026-06-15T09:00:00+00:00'), ['name' => 'Sam', 'contact' => 'sam@example.com']);
+
+        $updated = $service->reschedule($appointment, Carbon::parse('2026-06-15T10:00:00+00:00'));
+
+        $this->assertCount(1, $calendar->patched);
+        $this->assertSame('fake-event-1', $calendar->patched[0]['id']);
+        $this->assertSame('2026-06-15T10:00:00+00:00', $updated->starts_at->toIso8601String());
+    }
+
     public function test_cancel_deletes_event_and_marks_cancelled(): void
     {
         $workspace = $this->connectedWorkspace();

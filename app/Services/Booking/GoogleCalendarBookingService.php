@@ -57,16 +57,21 @@ class GoogleCalendarBookingService implements BookingService
             'attendee_email' => str_contains($customer['contact'], '@') ? $customer['contact'] : null,
         ]);
 
-        return $workspace->appointments()->create([
-            'workspace_id' => $workspace->id,
-            'conversation_id' => $conversationId,
-            'customer_name' => $customer['name'],
-            'customer_contact' => $customer['contact'],
-            'starts_at' => $startsAt,
-            'ends_at' => $endsAt,
-            'status' => 'booked',
-            'external_event_id' => $eventId,
-        ]);
+        try {
+            return $workspace->appointments()->create([
+                'workspace_id' => $workspace->id,
+                'conversation_id' => $conversationId,
+                'customer_name' => $customer['name'],
+                'customer_contact' => $customer['contact'],
+                'starts_at' => $startsAt,
+                'ends_at' => $endsAt,
+                'status' => 'booked',
+                'external_event_id' => $eventId,
+            ]);
+        } catch (\Throwable $e) {
+            $this->calendar->deleteEvent($account, $eventId);
+            throw $e;
+        }
     }
 
     public function find(Workspace $workspace, string $customerContact): Collection
