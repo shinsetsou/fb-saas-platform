@@ -24,7 +24,19 @@
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">Google Calendar</dt>
-                            <dd class="font-semibold">{{ $googleConnected ? 'Google Calendar connected' : 'Google Calendar not connected' }}</dd>
+                            <dd class="font-semibold">
+                                @if ($googleConnected)
+                                    <p class="text-sm text-green-700">Google Calendar connected</p>
+                                    <form method="POST" action="{{ route('google.disconnect') }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-sm text-red-600 underline">Disconnect</button>
+                                    </form>
+                                @else
+                                    <p class="text-sm text-gray-600">Google Calendar not connected</p>
+                                    <a href="{{ route('google.connect') }}" class="text-sm text-indigo-600 underline">Connect Google Calendar</a>
+                                @endif
+                            </dd>
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">Trial ends</dt>

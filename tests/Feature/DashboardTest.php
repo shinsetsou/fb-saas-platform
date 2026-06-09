@@ -25,4 +25,18 @@ class DashboardTest extends TestCase
             ->assertSee('Facebook not connected')
             ->assertSee('Google Calendar not connected');
     }
+
+    public function test_dashboard_shows_google_connected_when_account_exists(): void
+    {
+        $user = User::factory()->create(['name' => 'Morgan Owner']);
+        $workspace = app(CreateWorkspaceForUser::class)->handle($user);
+        $workspace->googleAccount()->create([
+            'access_token' => 'a', 'refresh_token' => 'r', 'expires_at' => now()->addHour(), 'calendar_id' => 'primary',
+        ]);
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Google Calendar connected');
+    }
 }

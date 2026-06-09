@@ -19,7 +19,7 @@ class DashboardController extends Controller
             'trial' => $workspace->trial,
             'botSetting' => $workspace->botSetting,
             'facebookConnected' => false,
-            'googleConnected' => false,
+            'googleConnected' => $workspace->googleAccount()->exists(),
         ]);
     }
 }
