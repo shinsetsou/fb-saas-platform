@@ -19,10 +19,10 @@ class GoogleApiCalendar implements GoogleCalendar
     {
         $service = new Calendar($this->clients->for($account));
 
-        $request = new FreeBusyRequest();
+        $request = new FreeBusyRequest;
         $request->setTimeMin($from->toRfc3339String());
         $request->setTimeMax($to->toRfc3339String());
-        $item = new FreeBusyRequestItem();
+        $item = new FreeBusyRequestItem;
         $item->setId($account->calendar_id);
         $request->setItems([$item]);
 
@@ -64,18 +64,18 @@ class GoogleApiCalendar implements GoogleCalendar
     /** @param array{summary: string, start: Carbon, end: Carbon, attendee_email: ?string} $event */
     private function toEvent(array $event): Event
     {
-        $start = new EventDateTime();
+        $start = new EventDateTime;
         $start->setDateTime($event['start']->toRfc3339String());
-        $end = new EventDateTime();
+        $end = new EventDateTime;
         $end->setDateTime($event['end']->toRfc3339String());
 
-        $google = new Event();
+        $google = new Event;
         $google->setSummary($event['summary']);
         $google->setStart($start);
         $google->setEnd($end);
 
         if (! empty($event['attendee_email'])) {
-            $attendee = new EventAttendee();
+            $attendee = new EventAttendee;
             $attendee->setEmail($event['attendee_email']);
             $google->setAttendees([$attendee]);
         }

@@ -6,6 +6,7 @@ use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Contracts\Factory as Socialite;
+use Laravel\Socialite\Contracts\Provider;
 use Mockery;
 use Tests\TestCase;
 
@@ -23,7 +24,7 @@ class GoogleCalendarConnectionTest extends TestCase
         $socialiteUser->refreshToken = 'refresh-xyz';
         $socialiteUser->expiresIn = 3600;
 
-        $provider = Mockery::mock(\Laravel\Socialite\Contracts\Provider::class);
+        $provider = Mockery::mock(Provider::class);
         $provider->shouldReceive('user')->andReturn($socialiteUser);
         $this->mock(Socialite::class)->shouldReceive('driver')->with('google')->andReturn($provider);
 
@@ -55,7 +56,7 @@ class GoogleCalendarConnectionTest extends TestCase
         $user = User::factory()->create();
         app(CreateWorkspaceForUser::class)->handle($user);
 
-        $provider = Mockery::mock(\Laravel\Socialite\Contracts\Provider::class);
+        $provider = Mockery::mock(Provider::class);
         $provider->shouldReceive('scopes')->andReturnSelf();
         $provider->shouldReceive('with')->andReturnSelf();
         $provider->shouldReceive('redirect')->andReturn(redirect('https://accounts.google.com/o/oauth2/auth'));

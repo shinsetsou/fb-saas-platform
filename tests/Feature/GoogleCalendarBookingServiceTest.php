@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Models\User;
+use App\Models\Workspace;
 use App\Services\Booking\GoogleCalendarBookingService;
 use App\Services\Booking\SlotGenerator;
 use Carbon\Carbon;
@@ -15,7 +16,7 @@ class GoogleCalendarBookingServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function connectedWorkspace(): \App\Models\Workspace
+    private function connectedWorkspace(): Workspace
     {
         $user = User::factory()->create();
         $workspace = app(CreateWorkspaceForUser::class)->handle($user);
@@ -50,7 +51,7 @@ class GoogleCalendarBookingServiceTest extends TestCase
     public function test_book_inserts_event_and_stores_external_id(): void
     {
         $workspace = $this->connectedWorkspace();
-        $calendar = new FakeGoogleCalendar();
+        $calendar = new FakeGoogleCalendar;
         $service = new GoogleCalendarBookingService($calendar, app(SlotGenerator::class));
 
         $appointment = $service->book(
@@ -67,7 +68,7 @@ class GoogleCalendarBookingServiceTest extends TestCase
     public function test_reschedule_patches_event_and_updates_times(): void
     {
         $workspace = $this->connectedWorkspace();
-        $calendar = new FakeGoogleCalendar();
+        $calendar = new FakeGoogleCalendar;
         $service = new GoogleCalendarBookingService($calendar, app(SlotGenerator::class));
         $appointment = $service->book($workspace, Carbon::parse('2026-06-15T09:00:00+00:00'), ['name' => 'Sam', 'contact' => 'sam@example.com']);
 
@@ -81,7 +82,7 @@ class GoogleCalendarBookingServiceTest extends TestCase
     public function test_cancel_deletes_event_and_marks_cancelled(): void
     {
         $workspace = $this->connectedWorkspace();
-        $calendar = new FakeGoogleCalendar();
+        $calendar = new FakeGoogleCalendar;
         $service = new GoogleCalendarBookingService($calendar, app(SlotGenerator::class));
         $appointment = $service->book($workspace, Carbon::parse('2026-06-15T09:00:00+00:00'), ['name' => 'Sam', 'contact' => 'sam@example.com']);
 

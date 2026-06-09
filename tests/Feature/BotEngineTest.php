@@ -20,7 +20,7 @@ class BotEngineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->app->instance(GoogleCalendar::class, new FakeGoogleCalendar());
+        $this->app->instance(GoogleCalendar::class, new FakeGoogleCalendar);
     }
 
     private function conversation(): Conversation

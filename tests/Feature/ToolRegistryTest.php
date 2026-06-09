@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Models\Conversation;
 use App\Models\User;
-use App\Models\Workspace;
 use App\Services\Booking\Google\GoogleCalendar;
 use App\Services\Bot\Tools\ToolContext;
 use App\Services\Bot\Tools\ToolRegistry;
@@ -20,7 +19,7 @@ class ToolRegistryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->app->instance(GoogleCalendar::class, new FakeGoogleCalendar());
+        $this->app->instance(GoogleCalendar::class, new FakeGoogleCalendar);
     }
 
     private function context(bool $connected): ToolContext

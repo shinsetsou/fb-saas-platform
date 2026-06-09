@@ -5,8 +5,8 @@ namespace Tests\Feature;
 use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Models\User;
 use App\Services\Booking\BookingServiceResolver;
-use App\Services\Booking\GoogleCalendarBookingService;
 use App\Services\Booking\Google\GoogleCalendar;
+use App\Services\Booking\GoogleCalendarBookingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\FakeGoogleCalendar;
 use Tests\TestCase;
@@ -18,7 +18,7 @@ class BookingServiceResolverTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->app->instance(GoogleCalendar::class, new FakeGoogleCalendar());
+        $this->app->instance(GoogleCalendar::class, new FakeGoogleCalendar);
     }
 
     public function test_returns_google_service_when_connected(): void

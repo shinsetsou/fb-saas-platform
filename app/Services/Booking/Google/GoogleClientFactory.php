@@ -10,7 +10,7 @@ class GoogleClientFactory
 {
     public function for(GoogleAccount $account): Client
     {
-        $client = new Client();
+        $client = new Client;
         $client->setClientId((string) config('services.google.client_id'));
         $client->setClientSecret((string) config('services.google.client_secret'));
         $client->setAccessToken([
