@@ -3,11 +3,14 @@
 namespace App\Services\Bot\Tools;
 
 use App\Services\Booking\BookingService;
+use App\Services\Booking\BookingServiceResolver;
 use Carbon\Carbon;
 
 class ToolRegistry
 {
-    public function __construct(private BookingService $booking) {}
+    private const NOT_CONNECTED = "The calendar isn't connected yet — a teammate will follow up.";
+
+    public function __construct(private BookingServiceResolver $resolver) {}
 
     /** @return array<int, array<string, mixed>> */
     public function definitions(): array
@@ -101,21 +104,35 @@ class ToolRegistry
         };
     }
 
+    private function resolveOrHandoff(ToolContext $context): ?BookingService
+    {
+        $service = $this->resolver->for($context->workspace);
+        if ($service === null) {
+            $context->conversation->update(['status' => 'needs_human']);
+        }
+
+        return $service;
+    }
+
     private function checkAvailability(array $input, ToolContext $context): string
     {
+        if (! $booking = $this->resolveOrHandoff($context)) {
+            return self::NOT_CONNECTED;
+        }
         $tz = $context->workspace->botSetting->booking_timezone ?: 'UTC';
         $day = Carbon::parse($input['date'], $tz);
-        $slots = $this->booking->availability($context->workspace, $day);
+        $slots = $booking->availability($context->workspace, $day);
 
-        return empty($slots)
-            ? 'No open slots on that date.'
-            : 'Open slots: '.implode(', ', $slots);
+        return $slots === [] ? 'No open slots on that date.' : 'Open slots: '.implode(', ', $slots);
     }
 
     private function bookAppointment(array $input, ToolContext $context): string
     {
+        if (! $booking = $this->resolveOrHandoff($context)) {
+            return self::NOT_CONNECTED;
+        }
         $tz = $context->workspace->botSetting->booking_timezone ?: 'UTC';
-        $appointment = $this->booking->book(
+        $appointment = $booking->book(
             $context->workspace,
             Carbon::parse($input['starts_at'], $tz),
             ['name' => $input['customer_name'], 'contact' => $input['customer_contact']],
@@ -127,8 +144,10 @@ class ToolRegistry
 
     private function findBooking(array $input, ToolContext $context): string
     {
-        $found = $this->booking->find($context->workspace, $input['customer_contact']);
-
+        if (! $booking = $this->resolveOrHandoff($context)) {
+            return self::NOT_CONNECTED;
+        }
+        $found = $booking->find($context->workspace, $input['customer_contact']);
         if ($found->isEmpty()) {
             return 'No booked appointments found for that contact.';
         }
@@ -138,25 +157,29 @@ class ToolRegistry
 
     private function rescheduleAppointment(array $input, ToolContext $context): string
     {
+        if (! $booking = $this->resolveOrHandoff($context)) {
+            return self::NOT_CONNECTED;
+        }
         $appointment = $context->workspace->appointments()->find($input['appointment_id']);
         if (! $appointment) {
             return 'Appointment not found.';
         }
-
         $tz = $context->workspace->botSetting->booking_timezone ?: 'UTC';
-        $updated = $this->booking->reschedule($appointment, Carbon::parse($input['new_starts_at'], $tz));
+        $updated = $booking->reschedule($appointment, Carbon::parse($input['new_starts_at'], $tz));
 
         return "Rescheduled to {$updated->starts_at->toIso8601String()}.";
     }
 
     private function cancelAppointment(array $input, ToolContext $context): string
     {
+        if (! $booking = $this->resolveOrHandoff($context)) {
+            return self::NOT_CONNECTED;
+        }
         $appointment = $context->workspace->appointments()->find($input['appointment_id']);
         if (! $appointment) {
             return 'Appointment not found.';
         }
-
-        $this->booking->cancel($appointment);
+        $booking->cancel($appointment);
 
         return 'Appointment cancelled.';
     }
