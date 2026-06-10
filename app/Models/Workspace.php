@@ -57,6 +57,11 @@ class Workspace extends Model
         return $this->hasMany(UsageRecord::class);
     }
 
+    public function canUseBot(): bool
+    {
+        return (bool) ($this->trial?->isActive() || $this->subscribed('default'));
+    }
+
     public function stripeEmail(): ?string
     {
         return $this->users()->wherePivot('role', 'owner')->first()?->email;

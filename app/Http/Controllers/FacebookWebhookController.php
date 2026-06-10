@@ -37,7 +37,7 @@ class FacebookWebhookController extends Controller
                 continue;
             }
 
-            $page = FacebookPage::with('workspace.botSetting', 'workspace.trial')
+            $page = FacebookPage::with('workspace.botSetting', 'workspace.trial', 'workspace.subscriptions')
                 ->where('page_id', $pageId)
                 ->first();
 
@@ -65,7 +65,7 @@ class FacebookWebhookController extends Controller
 
                 $workspace = $page->workspace;
 
-                if (! $workspace->botSetting?->is_enabled || ! $workspace->trial?->isActive()) {
+                if (! $workspace->botSetting?->is_enabled || ! $workspace->canUseBot()) {
                     continue;
                 }
 

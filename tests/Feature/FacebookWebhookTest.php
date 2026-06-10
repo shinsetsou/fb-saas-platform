@@ -174,4 +174,19 @@ class FacebookWebhookTest extends TestCase
 
         Queue::assertNothingPushed();
     }
+
+    public function test_subscribed_workspace_with_expired_trial_dispatches(): void
+    {
+        Queue::fake();
+        $workspace = $this->connectedWorkspace(trialActive: false);
+        $workspace->subscriptions()->create([
+            'type' => 'default', 'stripe_id' => 'sub_x', 'stripe_status' => 'active',
+            'stripe_price' => 'price_base', 'quantity' => 1,
+        ]);
+
+        $this->postWebhook($this->messagePayload('PAGE_1', 'psid', 'mid-sub', 'hi'))
+            ->assertOk();
+
+        Queue::assertPushed(ProcessIncomingMessage::class);
+    }
 }
