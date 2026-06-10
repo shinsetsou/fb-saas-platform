@@ -54,4 +54,13 @@ return [
         'graph_version' => env('FACEBOOK_GRAPH_VERSION', 'v21.0'),
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'price_base' => env('STRIPE_PRICE_BASE'),
+        'price_metered' => env('STRIPE_PRICE_METERED'),
+        'meter_event' => env('STRIPE_METER_EVENT', 'ai_replies'),
+    ],
+
 ];
