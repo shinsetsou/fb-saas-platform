@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Anthropic\Client;
 use App\Models\Workspace;
+use App\Services\Billing\StripeUsageMeter;
+use App\Services\Billing\UsageMeter;
 use App\Services\Booking\Google\GoogleApiCalendar;
 use App\Services\Booking\Google\GoogleCalendar;
 use App\Services\Bot\Claude\AnthropicClaudeClient;
@@ -26,6 +28,8 @@ class BotServiceProvider extends ServiceProvider
         $this->app->bind(GoogleCalendar::class, GoogleApiCalendar::class);
 
         $this->app->bind(FacebookGraph::class, HttpFacebookGraph::class);
+
+        $this->app->bind(UsageMeter::class, StripeUsageMeter::class);
 
         $this->app->bind(ClaudeClient::class, function () {
             $client = new Client(apiKey: (string) config('services.anthropic.key'));
