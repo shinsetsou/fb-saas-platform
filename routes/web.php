@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BotSettingsController;
 use App\Http\Controllers\ChatTesterController;
 use App\Http\Controllers\DashboardController;
@@ -35,6 +36,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/facebook/connect', [FacebookController::class, 'connect'])->name('facebook.connect');
     Route::get('/facebook/callback', [FacebookController::class, 'callback'])->name('facebook.callback');
     Route::delete('/facebook/disconnect', [FacebookController::class, 'disconnect'])->name('facebook.disconnect');
+
+    Route::get('/billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('/billing/portal', [BillingController::class, 'portal'])->name('billing.portal');
 });
 
 Route::middleware('auth')->group(function () {
