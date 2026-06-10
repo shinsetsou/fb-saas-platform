@@ -36,7 +36,10 @@ class FacebookMessengerChannelTest extends TestCase
             'status' => 'active',
         ]);
 
-        app(FacebookMessengerChannel::class)->sendReply($conversation, 'Booked!');
+        $message = app(FacebookMessengerChannel::class)->sendReply($conversation, 'Booked!');
+
+        $this->assertNotNull($message);
+        $this->assertSame('Booked!', $message->content);
 
         $this->assertDatabaseHas('messages', [
             'conversation_id' => $conversation->id,
