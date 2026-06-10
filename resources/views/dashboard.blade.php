@@ -28,6 +28,9 @@
                         @case('google-connect-failed')
                             Could not connect Google Calendar. Please try again.
                             @break
+                        @case('subscribed')
+                            Subscription active. Thanks!
+                            @break
                         @default
                             {{ session('status') }}
                     @endswitch
@@ -81,6 +84,43 @@
                         <div>
                             <dt class="text-sm text-gray-500">Trial ends</dt>
                             <dd class="font-semibold">{{ $trial->ends_at->toFormattedDateString() }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <h3 class="text-lg font-semibold text-gray-900">Billing</h3>
+                    <dl class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <dt class="text-sm text-gray-500">Status</dt>
+                            <dd class="font-semibold">
+                                @switch($billingStatus)
+                                    @case('subscribed')
+                                        <span class="text-green-700">Subscribed</span>
+                                        @break
+                                    @case('trialing')
+                                        <span class="text-indigo-700">Trialing</span>
+                                        @break
+                                    @default
+                                        <span class="text-red-700">Lapsed</span>
+                                @endswitch
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">Replies this month</dt>
+                            <dd class="font-semibold">{{ $repliesThisPeriod }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-gray-500">Manage</dt>
+                            <dd class="font-semibold">
+                                @if ($billingStatus === 'subscribed')
+                                    <a href="{{ route('billing.portal') }}" class="text-sm text-indigo-600 underline">Manage billing</a>
+                                @else
+                                    <a href="{{ route('billing.checkout') }}" class="text-sm text-indigo-600 underline">Subscribe</a>
+                                @endif
+                            </dd>
                         </div>
                     </dl>
                 </div>

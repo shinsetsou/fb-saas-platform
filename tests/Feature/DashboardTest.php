@@ -54,4 +54,45 @@ class DashboardTest extends TestCase
             ->assertOk()
             ->assertSee('Google Calendar connected');
     }
+
+    public function test_dashboard_shows_trialing_billing_status(): void
+    {
+        $user = User::factory()->create(['name' => 'Morgan Owner']);
+        app(CreateWorkspaceForUser::class)->handle($user);
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Trialing')
+            ->assertSee('Subscribe');
+    }
+
+    public function test_dashboard_shows_subscribed_status_and_manage_button(): void
+    {
+        $user = User::factory()->create();
+        $workspace = app(CreateWorkspaceForUser::class)->handle($user);
+        $workspace->subscriptions()->create([
+            'type' => 'default', 'stripe_id' => 'sub_1', 'stripe_status' => 'active',
+            'stripe_price' => 'price_base', 'quantity' => 1,
+        ]);
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Subscribed')
+            ->assertSee('Manage billing');
+    }
+
+    public function test_dashboard_shows_lapsed_when_trial_expired_and_unsubscribed(): void
+    {
+        $user = User::factory()->create();
+        $workspace = app(CreateWorkspaceForUser::class)->handle($user);
+        $workspace->trial->update(['status' => 'expired', 'ends_at' => now()->subDay()]);
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Lapsed')
+            ->assertSee('Subscribe');
+    }
 }
