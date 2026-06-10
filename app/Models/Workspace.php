@@ -52,6 +52,11 @@ class Workspace extends Model
         return $this->hasOne(FacebookPage::class);
     }
 
+    public function usageRecords(): HasMany
+    {
+        return $this->hasMany(UsageRecord::class);
+    }
+
     public function stripeEmail(): ?string
     {
         return $this->users()->wherePivot('role', 'owner')->first()?->email;
