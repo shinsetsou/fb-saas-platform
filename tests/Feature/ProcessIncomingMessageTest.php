@@ -6,6 +6,7 @@ use App\Actions\Workspaces\CreateWorkspaceForUser;
 use App\Jobs\ProcessIncomingMessage;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\Billing\UsageRecorder;
 use App\Services\Bot\BotEngine;
 use App\Services\Bot\Claude\ClaudeClient;
 use App\Services\Channels\ChannelResolver;
@@ -30,7 +31,7 @@ class ProcessIncomingMessageTest extends TestCase
         ]));
 
         (new ProcessIncomingMessage($workspace->id, 'web', 'visitor-1', 'hello'))
-            ->handle(app(BotEngine::class), app(ChannelResolver::class));
+            ->handle(app(BotEngine::class), app(ChannelResolver::class), app(UsageRecorder::class));
 
         $conversation = Conversation::where('external_participant_id', 'visitor-1')->firstOrFail();
         $this->assertDatabaseHas('messages', [

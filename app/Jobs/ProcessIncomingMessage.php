@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Conversation;
 use App\Models\Workspace;
+use App\Services\Billing\UsageRecorder;
 use App\Services\Bot\BotEngine;
 use App\Services\Channels\ChannelResolver;
 use Illuminate\Bus\Queueable;
@@ -23,7 +24,7 @@ class ProcessIncomingMessage implements ShouldQueue
         public string $text,
     ) {}
 
-    public function handle(BotEngine $engine, ChannelResolver $channels): void
+    public function handle(BotEngine $engine, ChannelResolver $channels, UsageRecorder $recorder): void
     {
         $workspace = Workspace::findOrFail($this->workspaceId);
 
@@ -38,6 +39,10 @@ class ProcessIncomingMessage implements ShouldQueue
 
         $reply = $engine->handle($conversation, $this->text);
 
-        $channels->for($conversation)->sendReply($conversation, $reply);
+        $message = $channels->for($conversation)->sendReply($conversation, $reply);
+
+        if ($message !== null) {
+            $recorder->record($message);
+        }
     }
 }
