@@ -9,7 +9,7 @@
         "php": "^8.2",
         "anthropic-ai/sdk": "^0.27.0",
         "google/apiclient": "^2.19",
-        "laravel/cashier": "*",
+        "laravel/cashier": "^16.0",
         "laravel/framework": "^12.0",
         "laravel/socialite": "^5.27",
         "laravel/tinker": "^2.10.1"
