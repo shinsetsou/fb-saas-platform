@@ -11,14 +11,15 @@ class DashboardController extends Controller
     {
         $workspace = $request->user()
             ->workspaces()
-            ->with(['trial', 'botSetting'])
+            ->with(['trial', 'botSetting', 'facebookPage'])
             ->firstOrFail();
 
         return view('dashboard', [
             'workspace' => $workspace,
             'trial' => $workspace->trial,
             'botSetting' => $workspace->botSetting,
-            'facebookConnected' => false,
+            'facebookConnected' => $workspace->facebookPage !== null,
+            'facebookPage' => $workspace->facebookPage,
             'googleConnected' => $workspace->googleAccount()->exists(),
         ]);
     }

@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Models\Conversation;
 use App\Models\Workspace;
 use App\Services\Bot\BotEngine;
-use App\Services\Channels\ConversationChannel;
+use App\Services\Channels\ChannelResolver;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,7 +23,7 @@ class ProcessIncomingMessage implements ShouldQueue
         public string $text,
     ) {}
 
-    public function handle(BotEngine $engine, ConversationChannel $channel): void
+    public function handle(BotEngine $engine, ChannelResolver $channels): void
     {
         $workspace = Workspace::findOrFail($this->workspaceId);
 
@@ -38,6 +38,6 @@ class ProcessIncomingMessage implements ShouldQueue
 
         $reply = $engine->handle($conversation, $this->text);
 
-        $channel->sendReply($conversation, $reply);
+        $channels->for($conversation)->sendReply($conversation, $reply);
     }
 }

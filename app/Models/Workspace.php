@@ -45,4 +45,9 @@ class Workspace extends Model
     {
         return $this->hasOne(GoogleAccount::class);
     }
+
+    public function facebookPage(): HasOne
+    {
+        return $this->hasOne(FacebookPage::class);
+    }
 }

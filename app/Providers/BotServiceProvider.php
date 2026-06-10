@@ -9,6 +9,8 @@ use App\Services\Bot\Claude\AnthropicClaudeClient;
 use App\Services\Bot\Claude\ClaudeClient;
 use App\Services\Channels\ConversationChannel;
 use App\Services\Channels\WebChatChannel;
+use App\Services\Facebook\FacebookGraph;
+use App\Services\Facebook\HttpFacebookGraph;
 use Illuminate\Support\ServiceProvider;
 
 class BotServiceProvider extends ServiceProvider
@@ -18,6 +20,8 @@ class BotServiceProvider extends ServiceProvider
         // Booking is resolved per workspace via BookingServiceResolver; the gateway
         // backs the real GoogleCalendarBookingService.
         $this->app->bind(GoogleCalendar::class, GoogleApiCalendar::class);
+
+        $this->app->bind(FacebookGraph::class, HttpFacebookGraph::class);
 
         $this->app->bind(ClaudeClient::class, function () {
             $client = new Client(apiKey: (string) config('services.anthropic.key'));

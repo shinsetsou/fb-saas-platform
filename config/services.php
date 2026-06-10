@@ -46,4 +46,12 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env('FACEBOOK_REDIRECT_URI'),
+        'verify_token' => env('FACEBOOK_WEBHOOK_VERIFY_TOKEN'),
+        'graph_version' => env('FACEBOOK_GRAPH_VERSION', 'v21.0'),
+    ],
+
 ];

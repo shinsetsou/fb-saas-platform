@@ -7,6 +7,33 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @if (session('status'))
+                <div class="bg-white border-l-4 border-indigo-500 p-4 shadow-sm sm:rounded-lg text-sm text-gray-800">
+                    @switch(session('status'))
+                        @case('facebook-connected')
+                            Facebook Page connected.
+                            @break
+                        @case('facebook-disconnected')
+                            Facebook Page disconnected.
+                            @break
+                        @case('facebook-connect-failed')
+                            Could not connect a Facebook Page. Make sure you manage at least one Page and try again.
+                            @break
+                        @case('google-connected')
+                            Google Calendar connected.
+                            @break
+                        @case('google-disconnected')
+                            Google Calendar disconnected.
+                            @break
+                        @case('google-connect-failed')
+                            Could not connect Google Calendar. Please try again.
+                            @break
+                        @default
+                            {{ session('status') }}
+                    @endswitch
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <dl class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -20,7 +47,20 @@
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">Facebook</dt>
-                            <dd class="font-semibold">{{ $facebookConnected ? 'Facebook connected' : 'Facebook not connected' }}</dd>
+                            <dd class="font-semibold">
+                                @if ($facebookConnected)
+                                    <p class="text-sm text-green-700">Facebook connected</p>
+                                    <p class="text-xs text-gray-600">{{ $facebookPage->page_name }}</p>
+                                    <form method="POST" action="{{ route('facebook.disconnect') }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-sm text-red-600 underline">Disconnect</button>
+                                    </form>
+                                @else
+                                    <p class="text-sm text-gray-600">Facebook not connected</p>
+                                    <a href="{{ route('facebook.connect') }}" class="text-sm text-indigo-600 underline">Connect Facebook Page</a>
+                                @endif
+                            </dd>
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">Google Calendar</dt>
