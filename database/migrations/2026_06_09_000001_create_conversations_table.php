@@ -15,7 +15,10 @@ return new class extends Migration
             $table->string('external_participant_id');
             $table->string('status')->default('active');
             $table->timestamps();
-            $table->unique(['workspace_id', 'channel', 'external_participant_id']);
+            $table->unique(
+                ['workspace_id', 'channel', 'external_participant_id'],
+                'conversations_workspace_channel_participant_unique',
+            );
         });
     }
 

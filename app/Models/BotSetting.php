@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BotSetting extends Model
 {
@@ -23,4 +24,9 @@ class BotSetting extends Model
         'is_enabled' => 'boolean',
         'booking_hours' => 'array',
     ];
+
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
+    }
 }

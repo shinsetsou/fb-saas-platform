@@ -1,0 +1,141 @@
+# Local dev / test stack for fb-saas.
+# Usage:
+#   cp .env.docker .env       # one-time, then fill in any secrets
+#   docker compose up --build
+#   open http://localhost:8080
+#
+# The first `up` boots MySQL, waits for it, migrates, and serves the app on
+# port 8080. `docker compose down -v` wipes the database volume.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fb-saas-app:local
+    container_name: fb-saas-app
+    environment:
+      CONTAINER_ROLE: php-fpm
+    volumes:
+      # Bind-mount the source so live edits work without rebuilding.
+      - ./:/var/www/html
+      # Keep vendor/ and node_modules/ as the image's copy — we don't want
+      # the host's versions to leak in. Same for bootstrap/cache: the host
+      # may have stale dev-provider discovery results (Pail, Sail) that
+      # conflict with the runtime image's dep set, so we generate it inside.
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+      - /var/www/html/bootstrap/cache
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  webserver:
+    image: caddy:2-alpine
+    container_name: fb-saas-webserver
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    environment:
+      # Touch the source on every request so the cached asset paths resolve
+      # correctly. (Caddy doesn't need this; it's here as a noop if a future
+      # Caddy module wants to read env.)
+      - CADDY_ADMIN=off
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    networks: [internal]
+
+  queue:
+    image: fb-saas-app:local
+    container_name: fb-saas-queue
+    environment:
+      CONTAINER_ROLE: queue
+    command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=1", "--timeout=120"]
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+      - /var/www/html/bootstrap/cache
+    depends_on:
+      app:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks: [internal]
+    restart: unless-stopped
+
+  scheduler:
+    image: fb-saas-app:local
+    container_name: fb-saas-scheduler
+    environment:
+      CONTAINER_ROLE: scheduler
+    command: ["php", "artisan", "schedule:work"]
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+      - /var/www/html/bootstrap/cache
+    depends_on:
+      app:
+        condition: service_healthy
+    networks: [internal]
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: fb-saas-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-fb_saas}
+      MYSQL_USER: ${DB_USERNAME:-fb_saas}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-fb_saas}
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+    networks: [internal]
+
+  # Optional: run `npm run dev` from inside the container and expose the
+  # Vite dev server on port 5173. Start with:
+  #   docker compose --profile dev up node
+  node:
+    image: node:20-alpine
+    container_name: fb-saas-node
+    profiles: ["dev"]
+    working_dir: /var/www/html
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/node_modules
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  caddy_data:
+  caddy_config:

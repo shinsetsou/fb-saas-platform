@@ -59,6 +59,75 @@
                     <textarea class="mt-1 block w-full rounded-md border-gray-300" id="bot_tone" name="bot_tone" rows="3">{{ old('bot_tone', $settings->bot_tone) }}</textarea>
                 </div>
 
+                @php
+                    $stored = old('booking_hours', $settings->booking_hours ?? null);
+                    if (is_string($stored)) {
+                        $stored = json_decode($stored, true) ?: null;
+                    }
+                    $hoursByDay = [];
+                    foreach ($weekdays as $day) {
+                        $ranges = $stored[$day] ?? [];
+                        $hoursByDay[$day] = [];
+                        foreach ($ranges as $range) {
+                            $hoursByDay[$day][] = [
+                                'start' => $range['start'] ?? '',
+                                'end' => $range['end'] ?? '',
+                            ];
+                        }
+                    }
+                @endphp
+
+                <fieldset class="border border-gray-200 rounded-md p-4">
+                    <legend class="px-2 text-sm font-medium text-gray-700">Booking hours</legend>
+                    <p class="text-xs text-gray-500 mb-3">Times are in <strong>{{ $settings->booking_timezone }}</strong>. Leave a day empty to mark it closed.</p>
+
+                    @error('booking_hours')
+                        <div class="mb-3 text-sm text-red-600 space-y-1">
+                            @foreach ((array) $message as $line)
+                                <p>{{ $line }}</p>
+                            @endforeach
+                        </div>
+                    @enderror
+
+                    <div class="space-y-3" x-data="bookingHours(@js($hoursByDay))">
+                        @foreach ($weekdays as $day)
+                            <div class="grid grid-cols-1 md:grid-cols-[120px_1fr_auto] gap-3 items-start">
+                                <div class="text-sm font-medium text-gray-700 pt-2 capitalize">{{ $day }}</div>
+                                <div class="space-y-2">
+                                    <template x-for="(range, index) in hours.{{ $day }}" :key="index">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <input
+                                                type="time"
+                                                class="rounded-md border-gray-300 text-sm"
+                                                :name="`booking_hours[{{ $day }}][${index}][start]`"
+                                                x-model="range.start"
+                                            >
+                                            <span class="text-gray-500 text-sm">to</span>
+                                            <input
+                                                type="time"
+                                                class="rounded-md border-gray-300 text-sm"
+                                                :name="`booking_hours[{{ $day }}][${index}][end]`"
+                                                x-model="range.end"
+                                            >
+                                            <button
+                                                type="button"
+                                                class="text-xs text-red-600 hover:underline"
+                                                x-show="hours.{{ $day }}.length > 1"
+                                                x-on:click="hours.{{ $day }}.splice(index, 1)"
+                                            >Remove</button>
+                                        </div>
+                                    </template>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="text-xs text-indigo-600 hover:underline pt-2"
+                                    x-on:click="hours.{{ $day }}.push({ start: '09:00', end: '17:00' })"
+                                >+ Add range</button>
+                            </div>
+                        @endforeach
+                    </div>
+                </fieldset>
+
                 <button class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-md font-semibold text-xs uppercase tracking-widest">
                     Save settings
                 </button>

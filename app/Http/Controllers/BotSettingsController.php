@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\BookingHours;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class BotSettingsController extends Controller
@@ -15,6 +17,7 @@ class BotSettingsController extends Controller
         return view('bot-settings.edit', [
             'workspace' => $workspace,
             'settings' => $workspace->botSetting,
+            'weekdays' => BookingHours::WEEKDAYS,
         ]);
     }
 
@@ -31,9 +34,22 @@ class BotSettingsController extends Controller
             'buffer_minutes' => ['required', 'integer', 'min:0', 'max:240'],
             'cancellation_instructions' => ['nullable', 'string', 'max:2000'],
             'bot_tone' => ['nullable', 'string', 'max:1000'],
+            'booking_hours' => ['nullable', 'array'],
+            'booking_hours.*' => ['array'],
+            'booking_hours.*.*' => ['array'],
+            'booking_hours.*.*.start' => ['nullable', 'string'],
+            'booking_hours.*.*.end' => ['nullable', 'string'],
         ]);
 
+        $normalized = BookingHours::normalize($request->input('booking_hours'));
+        $hoursErrors = BookingHours::validate($normalized);
+
+        if ($hoursErrors !== []) {
+            throw ValidationException::withMessages(['booking_hours' => $hoursErrors]);
+        }
+
         $validated['is_enabled'] = $request->boolean('is_enabled');
+        $validated['booking_hours'] = $normalized;
 
         $workspace->botSetting->update($validated);
 

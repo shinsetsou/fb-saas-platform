@@ -126,7 +126,11 @@ class FacebookWebhookTest extends TestCase
                 && $job->participantId === 'psid-9'
                 && $job->text === 'hello';
         });
-        $this->assertDatabaseHas('webhook_events', ['provider' => 'facebook', 'event_id' => 'mid-1']);
+        $this->assertDatabaseHas('webhook_events', [
+            'provider' => 'facebook',
+            'event_id' => 'mid-1',
+            'processed_at' => now()->toDateTimeString(),
+        ]);
     }
 
     public function test_duplicate_delivery_processes_once(): void
@@ -162,6 +166,11 @@ class FacebookWebhookTest extends TestCase
             ->assertOk();
 
         Queue::assertNothingPushed();
+        $this->assertDatabaseHas('webhook_events', [
+            'provider' => 'facebook',
+            'event_id' => 'mid-2',
+            'processed_at' => now()->toDateTimeString(),
+        ]);
     }
 
     public function test_expired_trial_does_not_dispatch(): void

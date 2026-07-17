@@ -66,10 +66,13 @@ class FacebookWebhookController extends Controller
                 $workspace = $page->workspace;
 
                 if (! $workspace->botSetting?->is_enabled || ! $workspace->canUseBot()) {
+                    $ledger->update(['processed_at' => now()]);
+
                     continue;
                 }
 
                 ProcessIncomingMessage::dispatch($workspace->id, 'facebook', $senderId, $text);
+                $ledger->update(['processed_at' => now()]);
             }
         }
 
