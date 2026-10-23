@@ -110,7 +110,7 @@
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">Replies this month</dt>
-                            <dd class="font-semibold">{{ $repliesThisPeriod }}</dd>
+                            <dd class="font-semibold" aria-label="replies this period">{{ $repliesThisPeriod }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">Manage</dt>
@@ -130,14 +130,52 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-900">Recent conversations</h3>
-                        <p class="mt-2 text-sm text-gray-600">Facebook message history will appear here after the Page integration is connected.</p>
+                        @if ($recentConversations->isEmpty())
+                            <p class="mt-2 text-sm text-gray-600">No conversations yet — connect a Facebook Page (or use the chat tester) to get started.</p>
+                        @else
+                            <ul class="mt-3 divide-y divide-gray-100">
+                                @foreach ($recentConversations as $conversation)
+                                    @php
+                                        $last = $conversation->messages->first();
+                                    @endphp
+                                    <li class="py-2 text-sm">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="font-medium text-gray-800">{{ $conversation->channel === 'web' ? 'Web tester' : ucfirst($conversation->channel) }} — {{ $conversation->external_participant_id }}</span>
+                                            <span class="text-xs text-gray-400">{{ $conversation->updated_at->diffForHumans() }}</span>
+                                        </div>
+                                        @if ($last)
+                                            <p class="mt-0.5 truncate text-gray-600">{{ $last->role === 'user' ? 'Customer: ' : 'Bot: ' }}{{ $last->content }}</p>
+                                        @endif
+                                        @if ($conversation->status === 'needs_human')
+                                            <span class="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">needs human</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-900">Recent bookings</h3>
-                        <p class="mt-2 text-sm text-gray-600">Calendar bookings will appear here after Google Calendar is connected.</p>
+                        @if ($recentBookings->isEmpty())
+                            <p class="mt-2 text-sm text-gray-600">No bookings yet — connect Google Calendar to let the bot book appointments.</p>
+                        @else
+                            <ul class="mt-3 divide-y divide-gray-100">
+                                @foreach ($recentBookings as $appointment)
+                                    <li class="py-2 text-sm">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="font-medium text-gray-800">{{ $appointment->customer_name }} <span class="text-gray-400">({{ $appointment->customer_contact }})</span></span>
+                                            <span class="text-xs text-gray-400">{{ $appointment->starts_at->format('M j, Y g:i A') }}</span>
+                                        </div>
+                                        @if ($appointment->status !== 'booked')
+                                            <span class="mt-1 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700">{{ $appointment->status }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
                     </div>
                 </div>
             </div>

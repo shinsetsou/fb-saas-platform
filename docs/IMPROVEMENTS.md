@@ -50,6 +50,11 @@ availability until someone edited the DB by hand.
 - `tests/Feature/BotSettingsTest.php` — extended with an "off + clear
   hours" test and an "overlapping ranges rejected" test.
 
+> Note (Oct 23 E2E): the first POST attempt from curl without proper
+> `booking_hours` array structure correctly 302s-then-fails validation
+> (fields stay untouched) — i.e. the shape validation also protects the
+> API/CLI path, not just the Blade form.
+
 ### 3. Tailwind v3 vs v4 mismatch in `package.json`
 
 `package.json` shipped both `tailwindcss ^3.1.0` and `@tailwindcss/vite
@@ -117,6 +122,9 @@ via the dashboard's per-section buttons.
 **Fix.** Add a top-level nav: Dashboard, Bot Settings, Chat Tester, Billing.
 Show a small badge for "not configured" items.
 
+**Fixed (Oct 23).** Dashboard, Bot Settings, Chat Tester, and Billing links
+added to both the desktop and responsive nav.
+
 ### 9. `welcome.blade.php` is the stock Laravel marketing page
 
 No product copy, no signup CTA above the fold. First impression for a
@@ -133,6 +141,11 @@ through `$workspace->conversations()->latest()->limit(5)` and
 
 **Fix.** Render actual lists with an empty state when the lists are empty
 ("No conversations yet — connect a Facebook Page to get started").
+
+**Fixed (Oct 23).** Both cards render real data: last 5 conversations
+(channel label, participant, last user/bot message preview, `needs_human`
+badge) and last 5 bookings (name, contact, start time, non-`booked` status
+badge), each with a proper empty state.
 
 ### 11. No generic flash/status banner for password updates or generic errors
 
@@ -153,6 +166,9 @@ Connect Facebook Page. 4. Enable the bot.") would help.
 A user could spam the bot. Compare to `verification.send` at
 `routes/auth.php:47` which uses `throttle:6,1`. Apply the same to
 `POST /chat-tester` (e.g. `throttle:60,1`).
+
+**Fixed (Oct 23).** `POST /chat-tester` is throttled to `throttle:30,1`
+(GET to 60,1). Verified live: request 31 gets a 429.
 
 ### 14. `welcome.blade.php` is reached at `/` and shows stock Laravel content
 
@@ -340,6 +356,8 @@ easily. Consider checking it on every release.
 Pick one and align both. Today's setup will route to a graph version that
 doesn't exist on some calls.
 
+**Fixed (Oct 23).** `.env.example` now matches at `v21.0`.
+
 ### 43. `ANTHROPIC_MODEL=claude-opus-4-8` in `.env.example`
 
 That model name does not match any current Anthropic model family. The SDK
@@ -348,11 +366,19 @@ call also uses `'thinking' => ['type' => 'adaptive']` and `'output_config' =>
 The bot will fail at runtime in any sandbox where this is the only model
 available. Validate with a smoke test that hits the API.
 
+**Verified (Oct 23).** A live end-to-end chat-tester smoke test (real
+Anthropic API, `.env` key) returned a genuine two-iteration reply with a
+clarifying question, then a correct handoff when no calendar was connected.
+Working config left as-is.
+
 ### 44. No CI config
 
 Tests are runnable locally (`composer test`) but there is no
 `.github/workflows` or other automation. Worth adding once the test suite
 stabilizes.
+
+### 40+41 (Oct 23). `composer test` now also runs `view:clear`, so a stale
+compiled Blade view can no longer mask edits during tests.
 
 ### 45. Tailwind v3 `content` glob in `tailwind.config.js` doesn't include `resources/js/**/*.js`
 

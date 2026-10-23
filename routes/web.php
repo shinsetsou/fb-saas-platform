@@ -26,8 +26,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/bot-settings', [BotSettingsController::class, 'edit'])->name('bot-settings.edit');
     Route::put('/bot-settings', [BotSettingsController::class, 'update'])->name('bot-settings.update');
 
-    Route::get('/chat-tester', [ChatTesterController::class, 'index'])->name('chat-tester.index');
-    Route::post('/chat-tester', [ChatTesterController::class, 'store'])->name('chat-tester.store');
+    Route::get('/chat-tester', [ChatTesterController::class, 'index'])->name('chat-tester.index')->middleware('throttle:60,1');
+    Route::post('/chat-tester', [ChatTesterController::class, 'store'])->name('chat-tester.store')->middleware('throttle:30,1');
 
     Route::get('/google/connect', [GoogleCalendarController::class, 'connect'])->name('google.connect');
     Route::get('/google/callback', [GoogleCalendarController::class, 'callback'])->name('google.callback');

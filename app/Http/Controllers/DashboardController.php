@@ -26,6 +26,18 @@ class DashboardController extends Controller
             ->where('created_at', '>=', now()->startOfMonth())
             ->count();
 
+        $recentConversations = $workspace->conversations()
+            ->with(['messages' => fn ($q) => $q->whereIn('role', ['user', 'assistant'])->latest('id')])
+            ->latest('id')
+            ->limit(5)
+            ->get();
+
+        $recentBookings = $workspace->appointments()
+            ->with('conversation')
+            ->latest('id')
+            ->limit(5)
+            ->get();
+
         return view('dashboard', [
             'workspace' => $workspace,
             'trial' => $workspace->trial,
@@ -35,6 +47,8 @@ class DashboardController extends Controller
             'googleConnected' => $workspace->googleAccount()->exists(),
             'billingStatus' => $billingStatus,
             'repliesThisPeriod' => $repliesThisPeriod,
+            'recentConversations' => $recentConversations,
+            'recentBookings' => $recentBookings,
         ]);
     }
 }
